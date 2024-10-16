@@ -1,0 +1,45 @@
+services:
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper
+    environment:
+      - ZOO_ENABLE_AUTH=no
+      - ZOO_SERVER_PORT=2181
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+    restart: unless-stopped
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    restart: unless-stopped
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - ./kafka.properties:/etc/kafka/server.properties
+
+  tgc2rss:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tgc2rss
+    environment:
+      KAFKA_ADDRESS: kafka
+      KAFKA_PORT: 9092
+      BOT_API_ID: ${BOT_API_ID}
+      BOT_API_HASH: ${BOT_API_HASH}
+    restart: unless-stopped
+    depends_on:
+      - kafka
+      - zookeeper
+
+volumes:
+  kafka-data:
