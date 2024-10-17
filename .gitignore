@@ -74,3 +74,7 @@ coverage.xml
 # Windows specific
 Thumbs.db
 *.session
+
+# Docker volumes
+kafka/
+zookeeper/

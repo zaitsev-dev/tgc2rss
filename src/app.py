@@ -1,17 +1,16 @@
 import asyncio
-import random
 
 from confluent_kafka import Message
 from loguru import logger
 
 from infrastructure.mq.consumers import poll_messages
+from infrastructure.mq.producers import send_message
 
 
 def log_message(msg: Message):
     """Log message to loguru (or not?)"""
-    if random.getrandbits(1):
-        raise Exception('Не судьба')
     logger.info(f'Got a message! See: {msg.value()}')
+    send_message('test-out', message=f'I got your message! Msg: {msg.value()}')
 
 
 async def main():

@@ -40,6 +40,6 @@ def poll_messages(topics: list[str], callback: Callable[[Message], Any]):
             try:
                 callback(msg)
             except Exception as e:
-                logger.error(f'Exception occurred: {e}')
+                logger.exception(e)
     finally:
         consumer.close()
