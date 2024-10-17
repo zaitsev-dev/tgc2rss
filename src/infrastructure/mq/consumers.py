@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from confluent_kafka import Consumer, KafkaException, Message
@@ -13,16 +13,16 @@ conf = {
 consumer = Consumer(conf)
 
 
-def poll_messages(topics: list[str], callback: Callable[[Message], Any]):
+async def poll_messages(topics: list[str], callback: Callable[[Message], Awaitable[Any]]):
     """Poll Kafka for specified topics
 
-    Parameters
-    ----------
+    Arguments:
         topics: list of topics to consume
         callback: handling callback for a message
 
     """
     consumer.subscribe(topics)
+    logger.info('Start a message queue polling')
 
     try:
         while True:
@@ -38,7 +38,7 @@ def poll_messages(topics: list[str], callback: Callable[[Message], Any]):
             logger.debug(f'Received message from topic {msg.topic()}: {msg.value()}')
 
             try:
-                callback(msg)
+                await callback(msg)
             except Exception as e:
                 logger.exception(e)
     finally:

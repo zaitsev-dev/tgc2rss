@@ -1,7 +1,7 @@
 from datetime import datetime
 from xml.etree.ElementTree import ParseError, fromstring
 
-from pydantic import BaseModel, HttpUrl, constr, field_validator
+from pydantic import BaseModel, Field, HttpUrl, constr, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
 
@@ -13,7 +13,7 @@ class RSSFeed(BaseModel):
     description: constr(min_length=1)
     items: list['RSSItem']
     language: constr(min_length=2, max_length=2) | None = None
-    last_build_date: datetime | None = None
+    last_build_date: datetime = Field(default_factory=datetime.now)
 
 
 class RSSItem(BaseModel):

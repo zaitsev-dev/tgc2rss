@@ -2,7 +2,6 @@ from telethon import TelegramClient
 from telethon import functions as tl_functions
 from telethon.tl.types import ChatFull
 
-from config import config
 from domain.models import BlogPost, Channel
 from domain.repositories.telegram import ITelegramRepository
 
@@ -10,8 +9,8 @@ from domain.repositories.telegram import ITelegramRepository
 class TelegramRepository(ITelegramRepository):
     """Telegram entities repository"""
 
-    def __init__(self):
-        self._client = TelegramClient('bot', api_id=config.bot_api_id, api_hash=config.bot_api_hash)
+    def __init__(self, api_id: int, api_hash: str):
+        self._client = TelegramClient('bot', api_id=api_id, api_hash=api_hash)
 
     def __del__(self):
         self._disconnect()
@@ -19,8 +18,7 @@ class TelegramRepository(ITelegramRepository):
     async def get_posts(self, channel: str, count: int = 10) -> list[BlogPost]:
         """Get list of latest posts of channel
 
-        Parameters
-        ----------
+        Arguments:
             channel: link or username of channel
             count: count of posts to fetch
 
@@ -41,8 +39,7 @@ class TelegramRepository(ITelegramRepository):
     async def get_channel(self, channel: str) -> Channel:
         """Get channel
 
-        Parameters
-        ----------
+        Arguments:
             channel: link or username of channel
 
         """

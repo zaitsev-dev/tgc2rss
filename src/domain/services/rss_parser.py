@@ -4,7 +4,7 @@ import bs4
 import mistletoe
 
 from domain.adapters import IRssModelAdapter
-from domain.models import RSSFeed, RSSItem
+from domain.models import RSSFeed, RSSItem, XMLFeed
 from domain.repositories import ITelegramRepository
 
 
@@ -14,10 +14,10 @@ class ChannelToRssParser:
     def __init__(self, telegram: ITelegramRepository, adapter_class: IRssModelAdapter, feed_size: int = 10):
         """Initialize an instance
 
-        Parameters
-        ----------
+        Arguments:
             telegram: Service for working with Telegram
             adapter_class: A class of adapter that converts RSSFeed to XML code
+            feed_size: Count if posts to fetch
 
         """
         self.telegram = telegram
@@ -27,8 +27,7 @@ class ChannelToRssParser:
     async def parse_channel(self, channel: str) -> RSSFeed:
         """Get channel posts and return a feed from those posts
 
-        Parameters
-        ----------
+        Arguments:
             channel: link or channel username
 
         """
@@ -54,11 +53,10 @@ class ChannelToRssParser:
             items=items,
         )
 
-    def feed_to_xml(self, feed: RSSFeed) -> str:
+    async def feed_to_xml(self, feed: RSSFeed) -> XMLFeed:
         """Convert RSSFeed to XML code
 
-        Parameters
-        ----------
+        Arguments:
             feed: feed model
 
         """
