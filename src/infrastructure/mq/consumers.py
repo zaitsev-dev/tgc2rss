@@ -1,19 +1,13 @@
 from collections.abc import Awaitable, Callable
 from typing import Any
 
-from confluent_kafka import Consumer, KafkaException, Message
+from aiokafka import AIOKafkaConsumer, ConsumerRecord
 from loguru import logger
 
 from config import config
 
-conf = {
-    'bootstrap.servers': f'{config.kafka_address}:{config.kafka_port}',
-    'group.id': 'my_group',
-}
-consumer = Consumer(conf)
 
-
-async def poll_messages(topics: list[str], callback: Callable[[Message], Awaitable[Any]]):
+async def poll_messages(topics: list[str], callback: Callable[[ConsumerRecord], Awaitable[Any]]):
     """Poll Kafka for specified topics
 
     Arguments:
@@ -21,25 +15,19 @@ async def poll_messages(topics: list[str], callback: Callable[[Message], Awaitab
         callback: handling callback for a message
 
     """
-    consumer.subscribe(topics)
-    logger.info('Start a message queue polling')
+    consumer = AIOKafkaConsumer(
+        *topics, bootstrap_servers=f'{config.kafka_address}:{config.kafka_port}', group_id='my_group'
+    )
 
+    await consumer.start()
     try:
-        while True:
-            msg = consumer.poll(timeout=1.0)
-
-            if msg is None:
-                continue
-
-            msg_error = msg.error()
-            if msg_error:
-                raise KafkaException(msg_error)
-
-            logger.debug(f'Received message from topic {msg.topic()}: {msg.value()}')
-
+        async for msg in consumer:
+            logger.debug('Consumed: ', msg.topic, msg.partition, msg.offset, msg.key, msg.value, msg.timestamp)
             try:
                 await callback(msg)
             except Exception as e:
-                logger.exception(e)
+                logger.error(f'The error occurred while handling the message {msg}: {e}')
+            else:
+                await consumer.commit()
     finally:
-        consumer.close()
+        await consumer.stop()

@@ -9,12 +9,12 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.12"
 pydantic = "^2.9.2"
-confluent-kafka = "^2.5.3"
-pydantic-settings = "^2.5.2"
+pydantic-settings = "^2.6.0"
 loguru = "^0.7.2"
 telethon = "^1.37.0"
 mistletoe = "^1.4.0"
 bs4 = "^0.0.2"
+aiokafka = "^0.11.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
