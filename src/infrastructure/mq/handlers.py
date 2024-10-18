@@ -19,4 +19,4 @@ async def handle_channel_message(msg: ConsumerRecord) -> None:
 
     feed = await service.feed_to_xml(await service.parse_channel(channel_username))
     json = feed.model_dump_json().encode()
-    send_message('feeds', message=json)
+    await send_message('feeds', message=json)

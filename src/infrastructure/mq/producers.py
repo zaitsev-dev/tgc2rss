@@ -1,14 +1,7 @@
-from collections.abc import Callable
-
-from confluent_kafka import Producer
+from aiokafka import AIOKafkaProducer
 from loguru import logger
 
 from config import config
-
-conf = {
-    'bootstrap.servers': f'{config.kafka_address}:{config.kafka_port}',
-}
-producer = Producer(conf)
 
 
 def delivery_report(err, msg):
@@ -19,7 +12,11 @@ def delivery_report(err, msg):
         logger.debug(f'Message delivered to {msg.topic()} [{msg.partition()}]')
 
 
-def send_message(topic: str, message: str | bytes, callback: Callable = delivery_report):
+async def send_message(topic: str, message: str | bytes):
     """Send a Kafka message to specified topic"""
-    producer.produce(topic, value=message, callback=callback)
-    producer.flush()
+    producer = AIOKafkaProducer(bootstrap_servers=f'{config.kafka_address}:{config.kafka_port}')
+    await producer.start()
+    try:
+        await producer.send_and_wait(topic, message)
+    finally:
+        await producer.stop()
